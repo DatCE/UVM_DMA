@@ -33,7 +33,12 @@ class base_item extends uvm_sequence_item;
 
 
     // AXI4 Slave Interface            
-    // -- AW channel        
+    // -- AW channel       
+  
+  
+  logic  [ATX_DST_DATA_W-1:0]    buffer_wdata [$];
+
+
   typedef enum {READ, WRITE} type_rd_wr; 
   typedef enum {SLV, MST} axi_side; 
 
@@ -58,10 +63,10 @@ class base_item extends uvm_sequence_item;
   logic                          s_bvalid_o;
   logic                          s_bready_i;
   // -- AR channel         
-  logic   [MST_ID_W-1:0]         s_arid_i;
-  logic   [S_ADDR_W-1:0]         s_araddr_i;
-  logic   [1:0]                  s_arburst_i;
-  logic   [ATX_LEN_W-1:0]        s_arlen_i;
+  rand bit   [MST_ID_W-1:0]         s_arid_i;
+  rand bit   [S_ADDR_W-1:0]         s_araddr_i;
+  rand bit   [1:0]                  s_arburst_i;
+  rand bit   [ATX_LEN_W-1:0]        s_arlen_i;
   logic                          s_arvalid_i;
   logic                          s_arready_o;
   // -- R channel          
@@ -134,6 +139,8 @@ class base_item extends uvm_sequence_item;
   constraint type_axi_cstr { type_axi inside {SLV, MST}; }
 
   `uvm_object_utils_begin(base_item)
+
+    `uvm_field_sarray_int(buffer_wdata, UVM_ALL_ON);
     `uvm_field_enum(type_rd_wr, type_act, UVM_ALL_ON);
     `uvm_field_enum(axi_side, type_axi, UVM_ALL_ON);
     `uvm_field_int(chn_id, UVM_ALL_ON);

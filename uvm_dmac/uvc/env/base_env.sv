@@ -2,7 +2,6 @@ class base_env extends uvm_env;
   
   base_agent master;
   base_scoreboard scoreboard0;
-
   `uvm_component_utils(base_env)
 
   function new(string name = "base_env", uvm_component parent);

@@ -1,6 +1,7 @@
 package base_uvm_pkg;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
+  `include "base_mem.sv"
   `include "base_item.sv"
   `include "base_driver.sv"
   `include "base_monitor.sv"

@@ -8,12 +8,12 @@ interface dut_if #(
   parameter ROB_EN            = 0,    // Reorder multiple AXI outstanding transactions enable
   parameter DESC_QUEUE_TYPE   = (DMA_DESC_DEPTH >= 16) ? "RAM-BASED" : "FLIPFLOP-BASED",
   // SOURCE 
-  parameter SRC_IF_TYPE       = "AXIS", // "AXI4" || "AXIS"
+  parameter SRC_IF_TYPE       = "AXI4", // "AXI4" || "AXIS"
   parameter SRC_ADDR_W        = 32,
   parameter SRC_TDEST_W       = 2,
   parameter ATX_SRC_DATA_W    = 256,
   // DESITNATION 
-  parameter DST_IF_TYPE       = "AXIS", // "AXI4" || "AXIS"
+  parameter DST_IF_TYPE       = "AXI4", // "AXI4" || "AXIS"
   parameter DST_ADDR_W        = 32,
   parameter DST_TDEST_W       = 2,
   parameter ATX_DST_DATA_W    = 256,
@@ -33,6 +33,7 @@ interface dut_if #(
     input bit clk,
     input bit rst
 );
+
 
     // AXI4 Slave Interface            
     // -- AW channel         
@@ -122,8 +123,8 @@ interface dut_if #(
   logic                          m_tvalid_o;
   logic                          m_tready_i;
   // Interrupt
-  logic                          irq         [0:DMA_CHN_NUM-1];  // Caused by TX Queueing; TX Completion
-  logic                          trap        [0:DMA_CHN_NUM-1];   // Caused by Wrong address mapping
+  logic  [0:DMA_CHN_NUM-1]       irq;  // Caused by TX Queueing; TX Completion
+  logic  [0:DMA_CHN_NUM-1]       trap;   // Caused by Wrong address mapping
 
 
   clocking cb @(posedge clk);
@@ -154,6 +155,5 @@ interface dut_if #(
           m_bready_o,
           m_tid_o, m_tdest_o, m_tdata_o, m_tkeep_o, m_tstrb_o, m_tlast_o, m_tvalid_o,
           irq, trap;
-
   endclocking
 endinterface

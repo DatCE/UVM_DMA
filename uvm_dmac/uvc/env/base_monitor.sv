@@ -9,6 +9,10 @@ class base_monitor extends uvm_monitor;
   `uvm_component_utils_end
   protected base_item trans_collected;
   protected base_item temp_trans;
+  protected base_item write_info;
+  protected base_item temp_write_info;
+  protected base_item q_write [$];
+  protected base_item temp_write;
   event cov_transaction;
   int test_phase;
   int i;
@@ -21,6 +25,7 @@ class base_monitor extends uvm_monitor;
     super.new(name, parent);
     item_collected_port = new("item_collected_port", this);
     trans_collected = new();
+    write_info = new();
     cov_trans = new();
     cov_trans.set_inst_name({get_full_name(), ".cov_trans"});
   endfunction
@@ -33,16 +38,31 @@ class base_monitor extends uvm_monitor;
 
   virtual task run_phase(uvm_phase phase);
     forever begin
-      @vif.cb;
-      // if (vif.cb.o_valid) begin
-      //   trans_collected.is_person = vif.cb.is_person;
-      //   trans_collected.result = vif.cb.result;
-      //   trans_collected.sw_id = vif.cb.sw_id;
-      //   trans_collected.o_valid = vif.cb.o_valid;
-      //   $cast(temp_trans, trans_collected.clone());
-      //   temp_trans.set_id_info(trans_collected);
-      //   item_collected_port.write(temp_trans);
-      // end
+      @(posedge vif.clk);
+      if (vif.m_awvalid_o && vif.m_awready_i) begin
+        write_info.m_awid_o = vif.m_awid_o;
+        write_info.m_awaddr_o = vif.m_awaddr_o;
+        write_info.m_awlen_o = vif.m_awlen_o;
+        write_info.m_awburst_o = vif.m_awburst_o;
+        temp_write_info = base_item::type_id::create("temp_write_info", this);
+        temp_write_info.copy(write_info);
+        q_write.push_back(temp_write_info);
+      end
+
+      if (vif.m_wvalid_o && vif.m_wready_i) begin
+        trans_collected.buffer_wdata.push_back(vif.m_wdata_o);
+        if (vif.m_wlast_o) begin
+          temp_write = q_write.pop_front();
+          trans_collected.m_awid_o = temp_write.m_awid_o;
+          trans_collected.m_awaddr_o = temp_write.m_awaddr_o;
+          trans_collected.m_awlen_o = temp_write.m_awlen_o;
+          trans_collected.m_awburst_o = temp_write.m_awburst_o;
+          $cast(temp_trans, trans_collected.clone());
+          temp_trans.set_id_info(trans_collected);
+          item_collected_port.write(temp_trans);
+          trans_collected.buffer_wdata.delete();
+        end
+      end
     end
   endtask
 

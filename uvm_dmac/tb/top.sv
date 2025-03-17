@@ -5,6 +5,7 @@
 import uvm_pkg::*;
 import base_uvm_pkg::*;
 `include "base_test.sv"
+// `include "base_mem.sv"
 `include "adma_as_atx_arb.sv"
 `include "adma_as_atx_fetch.sv"
 `include "adma_as_atx_req.sv"
@@ -32,14 +33,20 @@ import base_uvm_pkg::*;
 `include "arb_prior_granter.v"
 `include "arb_round_comp_detector.v"
 `include "arbiter_iwrr_1cycle.v"
+`include "bin2gray_converter.v"
+`include "gray2bin_converter.v"
+`include "onehot_decoder.v"
 `include "edgedet.v"
 `include "onehot_encoder.v"
+`include "asyn_fifo.v"
 `include "fifo.v"
+`include "sync_fifo.v"
+`include "mem.v"
+`include "reorder_buffer.v"
 `include "sb_fifo.v"
 `include "skid_buffer.v"
-`include "sync_fifo.v"
-`include "reorder_buffer.sv"
 `include "splitter.v"
+
 `define CLK_GEN(clk, cycle)\
     initial begin\
         clk = 0;\
@@ -56,12 +63,12 @@ module top;
   parameter ROB_EN = 0;  // Reorder multiple AXI outstanding transactions enable
   parameter DESC_QUEUE_TYPE = (DMA_DESC_DEPTH >= 16) ? "RAM-BASED" : "FLIPFLOP-BASED";
   // SOURCE 
-  parameter SRC_IF_TYPE = "AXIS";  // "AXI4" || "AXIS"
+  parameter SRC_IF_TYPE = "AXI4";  // "AXI4" || "AXIS"
   parameter SRC_ADDR_W = 32;
   parameter SRC_TDEST_W = 2;
   parameter ATX_SRC_DATA_W = 256;
   // DESITNATION 
-  parameter DST_IF_TYPE = "AXIS";  // "AXI4" || "AXIS"
+  parameter DST_IF_TYPE = "AXI4";  // "AXI4" || "AXIS"
   parameter DST_ADDR_W = 32;
   parameter DST_TDEST_W = 2;
   parameter ATX_DST_DATA_W = 256;
@@ -80,9 +87,11 @@ module top;
 
   bit clk = 0;
   bit rst = 0;
+  // base_mem memory; 
+  // memory.mem_init();
+  // memory.mem_print();
 
-
-  parameter cycle = 4;
+  parameter cycle = 2;
   `CLK_GEN(clk, cycle);
 
   dut_if #(
@@ -252,13 +261,16 @@ module top;
       .trap       (vif.trap)
   );
   initial begin
+    // memory.mem_init();
+    // $display("Memory hihi", memory.mem);
+    // memory.mem_print();
     uvm_config_db#(virtual dut_if)::set(null, "*", "vif", vif);
     run_test();
   end
 
   initial begin
     rst = 0;
-    repeat (5) @vif.cb;
+    repeat (5) @(posedge vif.clk);
     rst = 1;
   end
 endmodule

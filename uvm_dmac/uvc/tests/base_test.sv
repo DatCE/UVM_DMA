@@ -4,7 +4,8 @@ class base_test extends uvm_test;
   base_env bus_env;
   init_read_seq seq0;
   bit test_pass;
-
+  base_mem memory;
+  uvm_event dma_done;
   // The test's constructor
   function new(string name = "base_test", uvm_component parent = null);
     super.new(name, parent);
@@ -13,6 +14,12 @@ class base_test extends uvm_test;
   // Update this component's properties and create the base_tb component.
   virtual function void build_phase(uvm_phase phase); // Create the testbench.
     super.build_phase(phase);
+    memory = base_mem::type_id::create("memory", this);
+    memory.mem_init();
+    memory.mem_print();
+    dma_done = new("dma_done");
+    uvm_config_db#(uvm_event)::set(this, "*", "dma_done", dma_done);
+    uvm_config_db#(base_mem)::set(this, "*", "memory", memory);
     uvm_config_db#(int)::set(this, "*", "test_phase", 1);
     bus_env = base_env::type_id::create("bus_env", this);
     uvm_config_db#(int)::set(this,"bus_env.master", "is_active", UVM_ACTIVE);
@@ -26,7 +33,8 @@ class base_test extends uvm_test;
     phase.raise_objection(this);
     seq0 = init_read_seq::type_id::create("sequence0");
     seq0.start(bus_env.master.sequencer);
-    #100ns; // 26ns
+    #2000ns; // 26ns
+    // dma_done.wait_trigger();
     phase.drop_objection(this);
   endtask
 
