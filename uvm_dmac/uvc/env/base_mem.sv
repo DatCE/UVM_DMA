@@ -1,6 +1,6 @@
 class base_mem extends uvm_component;
     `uvm_component_utils(base_mem)
-    parameter MEM_SIZE = 1024;
+    parameter MEM_SIZE = 320 * 240;
     static bit [31:0] mem [MEM_SIZE];
 
     function new(string name = "base_mem", uvm_component parent = null);

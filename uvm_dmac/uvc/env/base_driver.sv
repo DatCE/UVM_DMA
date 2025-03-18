@@ -18,6 +18,24 @@ class base_driver extends uvm_driver #(base_item);
   base_item item_temp_ar;
   base_item item_temp_aw;
   base_item item_temp_w;
+  int wd_per_burst = -1;
+  int x_len = -1;
+  int y_len;
+  int num_trans_row = 0;
+  
+
+  parameter BASE_ADDR = 32'h8000_0000;
+  parameter SRC_ADDR = 'h0009 + BASE_ADDR;
+  parameter DST_ADDR = 'h000A + BASE_ADDR;
+  parameter TRANSFER_X_LEN_ADDR = 'h000B + BASE_ADDR;
+  parameter CHN_FLAGS_ADDR = 'h0002 + BASE_ADDR;
+  parameter ATX_SRC_BURST_ADDR = 'h0006 + BASE_ADDR;
+  parameter ATX_DST_BURST_ADDR = 'h0007 + BASE_ADDR; 
+  parameter ATX_WD_PER_BURST_ADDR  = 'h0008 + BASE_ADDR; 
+  parameter TRANSFER_Y_LEN_ADDR = 'h000C + BASE_ADDR; 
+  parameter SRC_STRIDE_ADDR = 'h000D + BASE_ADDR; 
+  parameter DST_STRIDE_ADDR = 'h000E + BASE_ADDR; 
+
   mailbox #(base_item)  slv_aw_mbx = new(0);
   mailbox #(base_item)  slv_w_mbx = new(0);
   mailbox #(base_item)  slv_b_mbx = new(0);
@@ -73,6 +91,45 @@ class base_driver extends uvm_driver #(base_item);
         slv_ar_mbx.put(rsp);
       end
       else if (b_item.type_act == WRITE && b_item.type_axi == SLV) begin
+        if (b_item.s_awaddr_i == SRC_ADDR) begin
+          item_collected_port.write(rsp);
+        end
+        if (b_item.s_awaddr_i == DST_ADDR) begin
+          item_collected_port.write(rsp);
+        end
+        if (b_item.s_awaddr_i == TRANSFER_X_LEN_ADDR) begin
+          x_len = b_item.s_wdata_i;
+          if (wd_per_burst != -1)  begin
+            num_trans_row = $ceil(1.0 * (x_len + 1) / (wd_per_burst + 1));
+          end
+          item_collected_port.write(rsp);
+        end
+        if (b_item.s_awaddr_i == CHN_FLAGS_ADDR) begin
+          item_collected_port.write(rsp);
+        end
+        if (b_item.s_awaddr_i == ATX_SRC_BURST_ADDR) begin
+          item_collected_port.write(rsp);
+        end
+        if (b_item.s_awaddr_i == ATX_DST_BURST_ADDR) begin
+          item_collected_port.write(rsp);
+        end
+        if (b_item.s_awaddr_i == ATX_WD_PER_BURST_ADDR) begin
+          wd_per_burst = b_item.s_wdata_i;
+          if (x_len != -1)  begin
+            num_trans_row = $ceil(1.0 * (x_len + 1) / (wd_per_burst + 1));
+          end
+          item_collected_port.write(rsp);
+        end
+        if (b_item.s_awaddr_i == TRANSFER_Y_LEN_ADDR) begin
+          y_len = b_item.s_wdata_i;
+          item_collected_port.write(rsp);
+        end
+        if (b_item.s_awaddr_i == SRC_STRIDE_ADDR) begin
+          item_collected_port.write(rsp);
+        end
+        if (b_item.s_awaddr_i == DST_STRIDE_ADDR) begin
+          item_collected_port.write(rsp);
+        end
         $display("SLV WRITE");
         slv_aw_mbx.put(rsp);
       end
@@ -166,7 +223,7 @@ class base_driver extends uvm_driver #(base_item);
       // vif.m_wready_i <= 0;
       @ (posedge vif.clk);
       vif.m_wready_i <= 1;
-      wait (vif.m_wlast_o && vif.m_wvalid_o                );
+      wait (vif.m_wlast_o && vif.m_wvalid_o);
       @ (posedge vif.clk);
       vif.m_wready_i <= 0;
       $cast(item_temp_w, item.clone());
@@ -188,7 +245,7 @@ class base_driver extends uvm_driver #(base_item);
       vif.m_bvalid_i <= 1;
       @(posedge vif.clk)
       vif.m_bvalid_i <= 0;
-      if (count == 2) dma_done.trigger();
+      if (count == num_trans_row * (y_len + 1) * 3) dma_done.trigger();
     end
   endtask
 

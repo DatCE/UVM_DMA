@@ -16,7 +16,7 @@ class base_test extends uvm_test;
     super.build_phase(phase);
     memory = base_mem::type_id::create("memory", this);
     memory.mem_init();
-    memory.mem_print();
+    // memory.mem_print();
     dma_done = new("dma_done");
     uvm_config_db#(uvm_event)::set(this, "*", "dma_done", dma_done);
     uvm_config_db#(base_mem)::set(this, "*", "memory", memory);
@@ -33,8 +33,8 @@ class base_test extends uvm_test;
     phase.raise_objection(this);
     seq0 = init_read_seq::type_id::create("sequence0");
     seq0.start(bus_env.master.sequencer);
-    #2000ns; // 26ns
-    // dma_done.wait_trigger();
+    // #2000ns; // 26ns
+    dma_done.wait_trigger();
     phase.drop_objection(this);
   endtask
 

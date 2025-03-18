@@ -7,6 +7,8 @@ class base_monitor extends uvm_monitor;
     `uvm_field_int(checks_enable, UVM_ALL_ON)
     `uvm_field_int(coverage_enable, UVM_ALL_ON)
   `uvm_component_utils_end
+
+
   protected base_item trans_collected;
   protected base_item temp_trans;
   protected base_item write_info;
@@ -39,6 +41,7 @@ class base_monitor extends uvm_monitor;
   virtual task run_phase(uvm_phase phase);
     forever begin
       @(posedge vif.clk);
+
       if (vif.m_awvalid_o && vif.m_awready_i) begin
         write_info.m_awid_o = vif.m_awid_o;
         write_info.m_awaddr_o = vif.m_awaddr_o;

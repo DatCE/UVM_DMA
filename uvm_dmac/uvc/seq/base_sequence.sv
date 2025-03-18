@@ -70,7 +70,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + CHN_FLAGS_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h2;
+                  s_wdata_i == 'h3;
 
                 });  
 
@@ -250,7 +250,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + SRC_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h0;
+                  s_wdata_i == 'd0;
                 });
 
     `uvm_do_with(req,
@@ -262,7 +262,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + DST_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h10;
+                  s_wdata_i == 'd10;
                 });
 
     `uvm_do_with(req,
@@ -276,6 +276,43 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awlen_i == 'h0; 
                   s_wdata_i == 'd10;
                 });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 0;
+                  s_awid_i == 9;
+                  s_awaddr_i == BASE_ADDR + TRANSFER_Y_LEN_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 'h0; 
+                  s_wdata_i == 'd1;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 0;
+                  s_awid_i == 10;
+                  s_awaddr_i == BASE_ADDR + SRC_STRIDE_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 'h0; 
+                  s_wdata_i == 'd320;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 0;
+                  s_awid_i == 11;
+                  s_awaddr_i == BASE_ADDR + DST_STRIDE_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 'h0; 
+                  s_wdata_i == 'd320;
+                });
+
     `uvm_do_with(req,
                 {
                   type_act == WRITE;
@@ -285,7 +322,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + ATX_ID_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h2;
+                  s_wdata_i == 'd2;
                 });
 
     `uvm_do_with(req,
@@ -297,7 +334,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + ATX_SRC_BURST_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == '0;
+                  s_wdata_i == 'd1;
                 });
 
     `uvm_do_with(req,
@@ -309,7 +346,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + ATX_DST_BURST_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 'h0; 
-                  s_wdata_i == 'h0;
+                  s_wdata_i == 'd1;
                 });
 
     `uvm_do_with(req,
@@ -321,7 +358,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + ATX_WD_PER_BURST_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h5;    // SO LUONG DATA TRONG MOI BURST
+                  s_wdata_i == 'd5;    // SO LUONG DATA TRONG MOI BURST
                 });
 
     `uvm_do_with(req,
@@ -336,7 +373,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_wdata_i == 'h1;
                 });
     // wait_response = 3;
-    repeat (8) begin
+    repeat (11) begin
       get_response(rsp);
       // cnt ++;
       // $display("Received response: %0d", cnt);

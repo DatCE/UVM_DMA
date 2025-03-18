@@ -41,24 +41,24 @@ interface dut_if #(
   logic   [S_ADDR_W-1:0]         s_awaddr_i;
   logic   [1:0]                  s_awburst_i;
   logic   [ATX_LEN_W-1:0]        s_awlen_i;
-  logic                          s_awvalid_i;
+  logic                          s_awvalid_i = 0;
   logic                          s_awready_o;
   // -- W channel          
   logic   [S_DATA_W-1:0]         s_wdata_i;
   logic                          s_wlast_i;
-  logic                          s_wvalid_i;
+  logic                          s_wvalid_i = 0;
   logic                          s_wready_o;
   // -- B channel          
   logic  [MST_ID_W-1:0]          s_bid_o;
   logic  [ATX_RESP_W-1:0]        s_bresp_o;
   logic                          s_bvalid_o;
-  logic                          s_bready_i;
+  logic                          s_bready_i = 0;
   // -- AR channel         
   logic   [MST_ID_W-1:0]         s_arid_i;
   logic   [S_ADDR_W-1:0]         s_araddr_i;
   logic   [1:0]                  s_arburst_i;
   logic   [ATX_LEN_W-1:0]        s_arlen_i;
-  logic                          s_arvalid_i;
+  logic                          s_arvalid_i = 0;
   logic                          s_arready_o;
   // -- R channel          
   logic  [MST_ID_W-1:0]          s_rid_o;
@@ -66,7 +66,7 @@ interface dut_if #(
   logic  [ATX_RESP_W-1:0]        s_rresp_o;
   logic                          s_rlast_o;
   logic                          s_rvalid_o;
-  logic                          s_rready_i;
+  logic                          s_rready_i = 0;
 
   // Source Interface
   // -- AXI4 
@@ -76,13 +76,13 @@ interface dut_if #(
   logic  [ATX_LEN_W-1:0]         m_arlen_o;
   logic  [1:0]                   m_arburst_o;
   logic                          m_arvalid_o;
-  logic                          m_arready_i;
+  logic                          m_arready_i = 0;
   // -- -- R channel          
   logic   [MST_ID_W-1:0]         m_rid_i;
   logic   [ATX_SRC_DATA_W-1:0]   m_rdata_i;
   logic   [ATX_RESP_W-1:0]       m_rresp_i;
-  logic                          m_rlast_i;
-  logic                          m_rvalid_i;
+  logic                          m_rlast_i = 0;
+  logic                          m_rvalid_i = 0;
   logic                          m_rready_o;
   // -- AXI-Stream Slave
   logic   [MST_ID_W-1:0]         s_tid_i;    
@@ -102,16 +102,16 @@ interface dut_if #(
   logic  [ATX_LEN_W-1:0]         m_awlen_o;
   logic  [1:0]                   m_awburst_o;
   logic                          m_awvalid_o;
-  logic                          m_awready_i;
+  logic                          m_awready_i = 0;
   // -- -- W channel          
   logic  [ATX_DST_DATA_W-1:0]    m_wdata_o;
   logic                          m_wlast_o;
   logic                          m_wvalid_o;
-  logic                          m_wready_i;
+  logic                          m_wready_i = 0;
   // -- -- B channel
   logic   [MST_ID_W-1:0]         m_bid_i;
   logic   [ATX_RESP_W-1:0]       m_bresp_i;
-  logic                          m_bvalid_i;
+  logic                          m_bvalid_i = 0;
   logic                          m_bready_o;
   // -- AXI-Stream
   logic  [MST_ID_W-1:0]          m_tid_o;    

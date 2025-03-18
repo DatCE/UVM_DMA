@@ -37,6 +37,9 @@ class base_item extends uvm_sequence_item;
   
   
   logic  [ATX_DST_DATA_W-1:0]    buffer_wdata [$];
+  logic  [9:0]                   src_addr;
+  logic  [9:0]                   dest_addr;
+  logic  [S_DATA_W-1:0]          x_len;
 
 
   typedef enum {READ, WRITE} type_rd_wr; 
@@ -141,6 +144,9 @@ class base_item extends uvm_sequence_item;
   `uvm_object_utils_begin(base_item)
 
     `uvm_field_sarray_int(buffer_wdata, UVM_ALL_ON);
+    `uvm_field_int (src_addr, UVM_ALL_ON);
+    `uvm_field_int (dest_addr, UVM_ALL_ON);
+    `uvm_field_int (x_len, UVM_ALL_ON);
     `uvm_field_enum(type_rd_wr, type_act, UVM_ALL_ON);
     `uvm_field_enum(axi_side, type_axi, UVM_ALL_ON);
     `uvm_field_int(chn_id, UVM_ALL_ON);
