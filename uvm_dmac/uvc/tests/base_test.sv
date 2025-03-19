@@ -62,7 +62,7 @@ class base_test extends uvm_test;
       done_dma_chn_1();
       done_dma_chn_2();
     join
-    #10000ns;
+    #100000ns;
     phase.drop_objection(this);
   endtask
 

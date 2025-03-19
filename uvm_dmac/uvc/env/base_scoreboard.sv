@@ -228,17 +228,41 @@ class base_scoreboard extends uvm_scoreboard;
 
       if (count_process == 20) begin
         $display ("ENTER MODE 2D - 2 DMA CHANNEL");
-        for (int k = 0; k < total_cyclic; k++) begin
-          for (int i = 0; i < y_len_1 + 1; i++) begin
-            for (int j = 0; j < x_len_1 + 1; j++) begin
-              mem_expected_chn_1[dst_addr_1 + i * dst_stride_1 + j].push_back(memory.read(src_addr_1 + i * src_stride_1 + j));
+        if  (src_burst_addr_1 == 1 && dst_burst_addr_1 == 1) begin
+          for (int k = 0; k < total_cyclic; k++) begin
+            for (int i = 0; i < y_len_1 + 1; i++) begin
+              for (int j = 0; j < x_len_1 + 1; j++) begin
+                mem_expected_chn_1[dst_addr_1 + i * dst_stride_1 + j].push_back(memory.read(src_addr_1 + i * src_stride_1 + j));
+              end
             end
           end
         end
-        for (int k = 0; k < total_cyclic; k++) begin
-          for (int i = 0; i < y_len_2 + 1; i++) begin
-            for (int j = 0; j < x_len_2 + 1; j++) begin
-              mem_expected_chn_2[dst_addr_2 + i * dst_stride_2 + j].push_back(memory.read(src_addr_2 + i * src_stride_2 + j));
+        if (src_burst_addr_2 == 1 && dst_burst_addr_2 == 1) begin
+          for (int k = 0; k < total_cyclic; k++) begin
+            for (int i = 0; i < y_len_2 + 1; i++) begin
+              for (int j = 0; j < x_len_2 + 1; j++) begin
+                mem_expected_chn_2[dst_addr_2 + i * dst_stride_2 + j].push_back(memory.read(src_addr_2 + i * src_stride_2 + j));
+              end
+            end
+          end
+        end
+
+        if (src_burst_addr_1 == 1 && dst_burst_addr_1 == 0) begin
+          for (int k = 0; k < total_cyclic; k++) begin
+            for (int i = 0; i < y_len_1 + 1; i++) begin
+              for (int j = 0; j < x_len_1 + 1; j++) begin
+                mem_expected_chn_1[dst_addr_1].push_back(memory.read(src_addr_1 + i * src_stride_1 + j));
+              end
+            end
+          end
+        end
+
+        if (src_burst_addr_2 == 1 && dst_burst_addr_2 == 0) begin
+          for (int k = 0; k < total_cyclic; k++) begin
+            for (int i = 0; i < y_len_2 + 1; i++) begin
+              for (int j = 0; j < x_len_2 + 1; j++) begin
+                mem_expected_chn_2[dst_addr_2].push_back(memory.read(src_addr_2 + i * src_stride_2 + j));
+              end
             end
           end
         end
@@ -251,10 +275,19 @@ class base_scoreboard extends uvm_scoreboard;
   virtual function void write_mon(base_item item);
     `uvm_info(get_type_name(), $sformatf("Captured packet from mon %s", item.sprint()), UVM_LOW)
     if (item.m_awburst_o == 0) begin
-      for (int i = 0; i < item.m_awlen_o + 1; i++) begin
-        mem_actual_chn_1[item.m_awaddr_o].push_back(item.buffer_wdata[0]);
-        item.buffer_wdata.pop_front();
+      if (item.m_awid_o == 1) begin
+        for (int i = 0; i < item.m_awlen_o + 1; i++) begin
+          mem_actual_chn_1[item.m_awaddr_o].push_back(item.buffer_wdata[0]);
+          item.buffer_wdata.pop_front();
+        end
       end
+      if (item.m_awid_o == 2) begin
+        for (int i = 0; i < item.m_awlen_o + 1; i++) begin
+          mem_actual_chn_2[item.m_awaddr_o].push_back(item.buffer_wdata[0]);
+          item.buffer_wdata.pop_front();
+        end
+      end
+
     end
     else if (item.m_awburst_o == 1) begin
       if (item.m_awid_o == 1) begin // Channel 1
