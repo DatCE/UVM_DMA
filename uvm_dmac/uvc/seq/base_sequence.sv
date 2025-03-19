@@ -45,7 +45,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + DMA_CONTROL_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h1;
+                  s_wdata_i == 1;
                 }
     );
     `uvm_do_with(req,
@@ -57,7 +57,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + CHN_CONTROL_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h1;
+                  s_wdata_i == 1;
 
                 });
 
@@ -70,7 +70,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + CHN_FLAGS_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h3;
+                  s_wdata_i == 1;
 
                 });  
 
@@ -83,7 +83,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + CHN_IRQ_MASK_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h3;
+                  s_wdata_i == 3;
 
                 });  
 
@@ -96,65 +96,65 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + CHN_ARBIT_RATE_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h1;
+                  s_wdata_i == 1;
 
                 });
   //------------------------------ END CHANNEL 1 ------------------------------
 
   //------------------------------ START CHANNEL 2 ------------------------------
-    // `uvm_do_with(req,
-    //             {
-    //               type_act == WRITE;
-    //               type_axi == SLV;
-    //               chn_id == 1;
-    //               s_awid_i == 6;
-    //               s_awaddr_i == BASE_ADDR + CHN_CONTROL_ADDR;
-    //               s_awburst_i == 0; // FIXED
-    //               s_awlen_i == 0; 
-    //               s_wdata_i == 'h1;
-    //             });
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 6;
+                  s_awaddr_i == BASE_ADDR + CHN_CONTROL_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 1;
+                });
 
-    // `uvm_do_with(req,
-    //             {
-    //               type_act == WRITE;
-    //               type_axi == SLV;
-    //               chn_id == 1;
-    //               s_awid_i == 7;
-    //               s_awaddr_i == BASE_ADDR + CHN_FLAGS_ADDR;
-    //               s_awburst_i == 0; // FIXED
-    //               s_awlen_i == 0; 
-    //               s_wdata_i == 'h2;
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 7;
+                  s_awaddr_i == BASE_ADDR + CHN_FLAGS_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 1;
 
-    //             });  
+                });  
   
-    // `uvm_do_with(req,
-    //             {
-    //               type_act == WRITE;
-    //               type_axi == SLV;
-    //               chn_id == 1;
-    //               s_awid_i == 8;
-    //               s_awaddr_i == BASE_ADDR + CHN_IRQ_MASK_ADDR;
-    //               s_awburst_i == 0; // FIXED
-    //               s_awlen_i == 0; 
-    //               s_wdata_i == 'h3;
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 8;
+                  s_awaddr_i == BASE_ADDR + CHN_IRQ_MASK_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 3;
 
-    //             });  
+                });  
 
-    // `uvm_do_with(req,
-    //             {
-    //               type_act == WRITE;
-    //               type_axi == SLV;
-    //               chn_id == 1;
-    //               s_awid_i == 9;
-    //               s_awaddr_i == BASE_ADDR + CHN_ARBIT_RATE_ADDR;
-    //               s_awburst_i == 0; // FIXED
-    //               s_awlen_i == 0; 
-    //               s_wdata_i == 'h1;
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 9;
+                  s_awaddr_i == BASE_ADDR + CHN_ARBIT_RATE_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 1;
 
-    //             });   
+                });   
 
   //------------------------------ END CHANNEL 2 ------------------------------
-    repeat (5) begin
+    repeat (9) begin
       get_response(rsp);
     end
 
@@ -241,6 +241,7 @@ class init_read_seq extends uvm_sequence #(base_item);
 
 
   //------------------------------ START WRITE TO DESCRIPTOR ------------------------------
+  //------------------------------ START CONFIG CHANNEL 1 ------------------------------
     `uvm_do_with(req,
                 {
                   type_act == WRITE;
@@ -250,7 +251,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + SRC_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'd0;
+                  s_wdata_i == 0;
                 });
 
     `uvm_do_with(req,
@@ -262,7 +263,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + DST_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'd10;
+                  s_wdata_i == 10;
                 });
 
     `uvm_do_with(req,
@@ -273,44 +274,8 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awid_i == 3;
                   s_awaddr_i == BASE_ADDR + TRANSFER_X_LEN_ADDR;
                   s_awburst_i == 0; // FIXED
-                  s_awlen_i == 'h0; 
-                  s_wdata_i == 'd10;
-                });
-
-    `uvm_do_with(req,
-                {
-                  type_act == WRITE;
-                  type_axi == SLV;
-                  chn_id == 0;
-                  s_awid_i == 9;
-                  s_awaddr_i == BASE_ADDR + TRANSFER_Y_LEN_ADDR;
-                  s_awburst_i == 0; // FIXED
-                  s_awlen_i == 'h0; 
-                  s_wdata_i == 'd1;
-                });
-
-    `uvm_do_with(req,
-                {
-                  type_act == WRITE;
-                  type_axi == SLV;
-                  chn_id == 0;
-                  s_awid_i == 10;
-                  s_awaddr_i == BASE_ADDR + SRC_STRIDE_ADDR;
-                  s_awburst_i == 0; // FIXED
-                  s_awlen_i == 'h0; 
-                  s_wdata_i == 'd320;
-                });
-
-    `uvm_do_with(req,
-                {
-                  type_act == WRITE;
-                  type_axi == SLV;
-                  chn_id == 0;
-                  s_awid_i == 11;
-                  s_awaddr_i == BASE_ADDR + DST_STRIDE_ADDR;
-                  s_awburst_i == 0; // FIXED
-                  s_awlen_i == 'h0; 
-                  s_wdata_i == 'd320;
+                  s_awlen_i == 0; 
+                  s_wdata_i == 10;
                 });
 
     `uvm_do_with(req,
@@ -319,10 +284,10 @@ class init_read_seq extends uvm_sequence #(base_item);
                   type_axi == SLV;
                   chn_id == 0;
                   s_awid_i == 4;
-                  s_awaddr_i == BASE_ADDR + ATX_ID_ADDR;
+                  s_awaddr_i == BASE_ADDR + TRANSFER_Y_LEN_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'd2;
+                  s_wdata_i == 1;
                 });
 
     `uvm_do_with(req,
@@ -331,10 +296,10 @@ class init_read_seq extends uvm_sequence #(base_item);
                   type_axi == SLV;
                   chn_id == 0;
                   s_awid_i == 5;
-                  s_awaddr_i == BASE_ADDR + ATX_SRC_BURST_ADDR;
+                  s_awaddr_i == BASE_ADDR + SRC_STRIDE_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'd1;
+                  s_wdata_i == 200;
                 });
 
     `uvm_do_with(req,
@@ -343,10 +308,10 @@ class init_read_seq extends uvm_sequence #(base_item);
                   type_axi == SLV;
                   chn_id == 0;
                   s_awid_i == 6;
-                  s_awaddr_i == BASE_ADDR + ATX_DST_BURST_ADDR;
+                  s_awaddr_i == BASE_ADDR + DST_STRIDE_ADDR;
                   s_awburst_i == 0; // FIXED
-                  s_awlen_i == 'h0; 
-                  s_wdata_i == 'd1;
+                  s_awlen_i == 0; 
+                  s_wdata_i == 300;
                 });
 
     `uvm_do_with(req,
@@ -355,10 +320,10 @@ class init_read_seq extends uvm_sequence #(base_item);
                   type_axi == SLV;
                   chn_id == 0;
                   s_awid_i == 7;
-                  s_awaddr_i == BASE_ADDR + ATX_WD_PER_BURST_ADDR;
+                  s_awaddr_i == BASE_ADDR + ATX_ID_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'd5;    // SO LUONG DATA TRONG MOI BURST
+                  s_wdata_i == 1;
                 });
 
     `uvm_do_with(req,
@@ -367,13 +332,182 @@ class init_read_seq extends uvm_sequence #(base_item);
                   type_axi == SLV;
                   chn_id == 0;
                   s_awid_i == 8;
+                  s_awaddr_i == BASE_ADDR + ATX_SRC_BURST_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 1;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 0;
+                  s_awid_i == 9;
+                  s_awaddr_i == BASE_ADDR + ATX_DST_BURST_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 1;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 0;
+                  s_awid_i == 10;
+                  s_awaddr_i == BASE_ADDR + ATX_WD_PER_BURST_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 5;    // SO LUONG DATA TRONG MOI BURST
+                });
+
+  //------------------------------ END CONFIG CHANNEL 1 ------------------------------
+  //------------------------------ START CONFIG CHANNEL 2 ------------------------------
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 11;
+                  s_awaddr_i == BASE_ADDR + SRC_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 20;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 12;
+                  s_awaddr_i == BASE_ADDR + DST_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 30;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 13;
+                  s_awaddr_i == BASE_ADDR + TRANSFER_X_LEN_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 10;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 14;
+                  s_awaddr_i == BASE_ADDR + TRANSFER_Y_LEN_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 1;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 15;
+                  s_awaddr_i == BASE_ADDR + SRC_STRIDE_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 400;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 16;
+                  s_awaddr_i == BASE_ADDR + DST_STRIDE_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 500;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 17;
+                  s_awaddr_i == BASE_ADDR + ATX_ID_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 2;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 18;
+                  s_awaddr_i == BASE_ADDR + ATX_SRC_BURST_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 1;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 19;
+                  s_awaddr_i == BASE_ADDR + ATX_DST_BURST_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 1;
+                });
+
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 20;
+                  s_awaddr_i == BASE_ADDR + ATX_WD_PER_BURST_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 5;    // SO LUONG DATA TRONG MOI BURST
+                });
+  //------------------------------ END CONFIG CHANNEL 2 ------------------------------
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 0;
+                  s_awid_i == 21;
                   s_awaddr_i == BASE_ADDR + TRANSFER_SUBMIT_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 'h1;
+                  s_wdata_i == 1;
+                });
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 22;
+                  s_awaddr_i == BASE_ADDR + TRANSFER_SUBMIT_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 1;
                 });
     // wait_response = 3;
-    repeat (11) begin
+    repeat (22) begin
       get_response(rsp);
       // cnt ++;
       // $display("Received response: %0d", cnt);

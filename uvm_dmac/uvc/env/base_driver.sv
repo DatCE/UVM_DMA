@@ -22,6 +22,7 @@ class base_driver extends uvm_driver #(base_item);
   int x_len = -1;
   int y_len;
   int num_trans_row = 0;
+  int chn_id;
   
 
   parameter BASE_ADDR = 32'h8000_0000;
@@ -85,55 +86,54 @@ class base_driver extends uvm_driver #(base_item);
       `uvm_info("run_phase", $sformatf("Start driver: %s", b_item.sprint()), UVM_LOW)
       $cast(rsp, b_item.clone());
       rsp.set_id_info(b_item);
-      $display("COME-HERE");
       if (b_item.type_act == READ && b_item.type_axi == SLV) begin
-        $display("SLV READ");
         slv_ar_mbx.put(rsp);
       end
       else if (b_item.type_act == WRITE && b_item.type_axi == SLV) begin
-        if (b_item.s_awaddr_i == SRC_ADDR) begin
+        // CHANNEL 1
+        chn_id = b_item.chn_id;
+        if (b_item.s_awaddr_i == SRC_ADDR + chn_id * (2**4)) begin
           item_collected_port.write(rsp);
         end
-        if (b_item.s_awaddr_i == DST_ADDR) begin
+        if (b_item.s_awaddr_i == DST_ADDR + chn_id * (2**4)) begin
           item_collected_port.write(rsp);
         end
-        if (b_item.s_awaddr_i == TRANSFER_X_LEN_ADDR) begin
+        if (b_item.s_awaddr_i == TRANSFER_X_LEN_ADDR + chn_id * (2**4)) begin
           x_len = b_item.s_wdata_i;
           if (wd_per_burst != -1)  begin
             num_trans_row = $ceil(1.0 * (x_len + 1) / (wd_per_burst + 1));
           end
           item_collected_port.write(rsp);
         end
-        if (b_item.s_awaddr_i == CHN_FLAGS_ADDR) begin
+        if (b_item.s_awaddr_i == CHN_FLAGS_ADDR + chn_id * (2**4)) begin
           item_collected_port.write(rsp);
         end
-        if (b_item.s_awaddr_i == ATX_SRC_BURST_ADDR) begin
+        if (b_item.s_awaddr_i == ATX_SRC_BURST_ADDR + chn_id * (2**4)) begin
           item_collected_port.write(rsp);
         end
-        if (b_item.s_awaddr_i == ATX_DST_BURST_ADDR) begin
+        if (b_item.s_awaddr_i == ATX_DST_BURST_ADDR + chn_id * (2**4)) begin
           item_collected_port.write(rsp);
         end
-        if (b_item.s_awaddr_i == ATX_WD_PER_BURST_ADDR) begin
+        if (b_item.s_awaddr_i == ATX_WD_PER_BURST_ADDR + chn_id * (2**4)) begin
           wd_per_burst = b_item.s_wdata_i;
           if (x_len != -1)  begin
             num_trans_row = $ceil(1.0 * (x_len + 1) / (wd_per_burst + 1));
           end
           item_collected_port.write(rsp);
         end
-        if (b_item.s_awaddr_i == TRANSFER_Y_LEN_ADDR) begin
+        if (b_item.s_awaddr_i == TRANSFER_Y_LEN_ADDR + chn_id * (2**4)) begin
           y_len = b_item.s_wdata_i;
           item_collected_port.write(rsp);
         end
-        if (b_item.s_awaddr_i == SRC_STRIDE_ADDR) begin
+        if (b_item.s_awaddr_i == SRC_STRIDE_ADDR + chn_id * (2**4)) begin
           item_collected_port.write(rsp);
         end
-        if (b_item.s_awaddr_i == DST_STRIDE_ADDR) begin
+        if (b_item.s_awaddr_i == DST_STRIDE_ADDR + chn_id * (2**4)) begin
           item_collected_port.write(rsp);
         end
-        $display("SLV WRITE");
+
         slv_aw_mbx.put(rsp);
       end
-      $display("FINISH");
       // else if (b_item.type_act == "READ" && b_item.type_axi == "MST") begin
       //   mst_w_mbx.put(rsp);
       // end

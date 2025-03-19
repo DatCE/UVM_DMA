@@ -21,21 +21,36 @@ class base_scoreboard extends uvm_scoreboard;
 
   int count_config;
   int count_process;
-  int src_addr;
-  int dst_addr;
-  int x_len;
-  int y_len;
-  int chn_flag;
-  int src_burst_addr;
-  int dst_burst_addr;
-  int wd_per_burst_addr;
-  int src_stride;
-  int dst_stride;
+
+  int src_addr_1;
+  int dst_addr_1;
+  int x_len_1;
+  int y_len_1;
+  int chn_flag_1;
+  int src_burst_addr_1;
+  int dst_burst_addr_1;
+  int wd_per_burst_addr_1;
+  int src_stride_1;
+  int dst_stride_1;
+
+  int src_addr_2;
+  int dst_addr_2;
+  int x_len_2;
+  int y_len_2;
+  int chn_flag_2;
+  int src_burst_addr_2;
+  int dst_burst_addr_2;
+  int wd_per_burst_addr_2;
+  int src_stride_2;
+  int dst_stride_2;
+
+  int chn_id;
+
   int total_cyclic = 3;
-  bit  [31:0] mem_expected [TOTAL_PIXEL] [$];
-  bit  [31:0] mem_actual   [TOTAL_PIXEL] [$];
-  bit  [31:0] temp_mem_expected [TOTAL_PIXEL] [$];
-  bit  [31:0] temp_mem_actual   [TOTAL_PIXEL] [$];
+  bit  [31:0] mem_expected_chn_1 [TOTAL_PIXEL] [$];
+  bit  [31:0] mem_expected_chn_2 [TOTAL_PIXEL] [$];
+  bit  [31:0] mem_actual_chn_1   [TOTAL_PIXEL] [$];
+  bit  [31:0] mem_actual_chn_2   [TOTAL_PIXEL] [$];
   base_mem memory;
 
   function new(string name = "base_scoreboard", uvm_component parent);
@@ -50,108 +65,179 @@ class base_scoreboard extends uvm_scoreboard;
 
     // $display("IN SCOREBOARD");
     // memory.mem_print();
-    for (int i = 0; i < 1024; i++) begin
-      mem_expected[i].delete();
-      mem_actual[i].delete();
+    for (int i = 0; i < TOTAL_PIXEL; i++) begin
+      mem_expected_chn_1[i].delete();
+      mem_expected_chn_2[i].delete();
+      mem_actual_chn_1[i].delete();
+      mem_actual_chn_2[i].delete();
     end
   endfunction
 
 
   virtual function void write_drv(base_item item);
     `uvm_info(get_type_name(), $sformatf("Captured packet from drv %s", item.sprint()), UVM_LOW)
-    if (item.s_awaddr_i == CHN_FLAGS_ADDR) begin
+    chn_id = item.chn_id;
+
+    if (item.s_awaddr_i == CHN_FLAGS_ADDR + chn_id * (2**4)) begin
       if (item.s_wdata_i == 2) begin
-        count_process = 7;
+        count_process += 7;
         $display("Mode: Cyclic");
       end
       if (item.s_wdata_i == 1) begin
-        count_process = 10;
+        count_process += 10;
         $display("Mode: 2D transfer");
       end
       if (item.s_wdata_i == 3) begin
-        count_process = 10;
+        count_process += 10;
         $display("Mode: 2D transfer & Cyclic");
       end
     end
-    if (item.s_awaddr_i == SRC_ADDR) begin
-      src_addr = item.s_wdata_i;
+    if (item.s_awaddr_i == SRC_ADDR + chn_id * (2**4)) begin
+      if (chn_id == 0) begin
+        src_addr_1 = item.s_wdata_i;
+      end
+      else if (chn_id == 1) begin
+        src_addr_2 = item.s_wdata_i;
+      end
       count_config++;
     end
-    if (item.s_awaddr_i == DST_ADDR) begin
-      dst_addr = item.s_wdata_i;
+    if (item.s_awaddr_i == DST_ADDR + chn_id * (2**4)) begin
+      if (chn_id == 0) begin
+        dst_addr_1 = item.s_wdata_i;
+      end
+      else if (chn_id == 1) begin
+        dst_addr_2 = item.s_wdata_i;
+      end
       count_config++;
     end
-    if (item.s_awaddr_i == TRANSFER_X_LEN_ADDR) begin
-      x_len = item.s_wdata_i;
+    if (item.s_awaddr_i == TRANSFER_X_LEN_ADDR + chn_id * (2**4)) begin
+      if (chn_id == 0) begin
+        x_len_1 = item.s_wdata_i;
+      end
+      else if (chn_id == 1) begin
+        x_len_2 = item.s_wdata_i;
+      end
       count_config++;
     end
-    if (item.s_awaddr_i == TRANSFER_Y_LEN_ADDR) begin
-      y_len = item.s_wdata_i;
+    if (item.s_awaddr_i == TRANSFER_Y_LEN_ADDR + chn_id * (2**4)) begin
+      if (chn_id == 0) begin
+        y_len_1 = item.s_wdata_i;
+      end
+      else if (chn_id == 1) begin
+        y_len_2 = item.s_wdata_i;
+      end
       count_config++;
     end
-    if (item.s_awaddr_i == SRC_STRIDE_ADDR) begin
-      src_stride = item.s_wdata_i;
+    if (item.s_awaddr_i == SRC_STRIDE_ADDR + chn_id * (2**4)) begin
+      if (chn_id == 0) begin
+        src_stride_1 = item.s_wdata_i;
+      end
+      else if (chn_id == 1) begin
+        src_stride_2 = item.s_wdata_i;
+      end
       count_config++;
     end
-    if (item.s_awaddr_i == DST_STRIDE_ADDR) begin
-      dst_stride = item.s_wdata_i;
+    if (item.s_awaddr_i == DST_STRIDE_ADDR + chn_id * (2**4)) begin
+      if (chn_id == 0) begin
+        dst_stride_1 = item.s_wdata_i;
+      end
+      else if (chn_id == 1) begin
+        dst_stride_2 = item.s_wdata_i;
+      end
       count_config++;
     end
-    if (item.s_awaddr_i == CHN_FLAGS_ADDR) begin
-      chn_flag = item.s_wdata_i;
+    if (item.s_awaddr_i == CHN_FLAGS_ADDR + chn_id * (2**4)) begin
+      if (chn_id == 0) begin
+        chn_flag_1 = item.s_wdata_i;
+      end
+      else if (chn_id == 1) begin
+        chn_flag_2 = item.s_wdata_i;
+      end
       count_config++;
     end
-    if (item.s_awaddr_i == ATX_SRC_BURST_ADDR) begin
-      src_burst_addr = item.s_wdata_i;
+    if (item.s_awaddr_i == ATX_SRC_BURST_ADDR + chn_id * (2**4)) begin
+      if (chn_id == 0) begin
+        src_burst_addr_1 = item.s_wdata_i;
+      end
+      else if (chn_id == 1) begin
+        src_burst_addr_2 = item.s_wdata_i;
+      end
       count_config++;
     end
-    if (item.s_awaddr_i == ATX_DST_BURST_ADDR) begin
-      dst_burst_addr = item.s_wdata_i;
+    if (item.s_awaddr_i == ATX_DST_BURST_ADDR + chn_id * (2**4)) begin
+      if (chn_id == 0) begin
+        dst_burst_addr_1 = item.s_wdata_i;
+      end
+      else if (chn_id == 1) begin
+        dst_burst_addr_2 = item.s_wdata_i;
+      end
       count_config++;
     end
-    if (item.s_awaddr_i == ATX_WD_PER_BURST_ADDR) begin
-      wd_per_burst_addr = item.s_wdata_i;
+    if (item.s_awaddr_i == ATX_WD_PER_BURST_ADDR + chn_id * (2**4)) begin
+      if (chn_id == 0) begin
+        wd_per_burst_addr_1 = item.s_wdata_i;
+      end
+      else if (chn_id == 1) begin
+        wd_per_burst_addr_2 = item.s_wdata_i;
+      end
       count_config++;
     end
+    $display ("count process: %0d", count_process);
     $display ("count config: %0d", count_config);
     if (count_config == count_process) begin
-      if (count_process == 7) begin // MODE CYCLIC
-        // MODE AXI FIXED
-        if (src_burst_addr == 0 && dst_burst_addr == 0) begin
-          $display("ENTER MODE 1");
-          for (int i = 0; i < x_len + 1; i++) begin
-            mem_expected[dst_addr].push_back(memory.read(src_addr));
-          end
-        end
-        else if (src_burst_addr == 1 && dst_burst_addr == 0) begin
-          $display("ENTER MODE 2");
-          for (int i = 0; i < x_len + 1; i++) begin
-            mem_expected[dst_addr].push_back(memory.read(src_addr + i));
-          end
-        end
-        else if (src_burst_addr == 0 && dst_burst_addr == 1) begin
-          $display("ENTER MODE 3");
-          for (int i = 0; i < x_len + 1; i++) begin
-            mem_expected[dst_addr + i].push_back(memory.read((src_addr + i) % (wd_per_burst_addr + 1)));
-          end
-        end
-        else if (src_burst_addr == 1 && dst_burst_addr == 1) begin
-          $display("ENTER MODE 4");
-          for (int i = 0; i < x_len + 1; i++) begin
-            mem_expected[dst_addr + i].push_back(memory.read(src_addr + i));
-          end
-        end
-      end
+      // if (count_process == 7) begin // MODE CYCLIC
+      //   // MODE AXI FIXED
+      //   if (src_burst_addr == 0 && dst_burst_addr == 0) begin
+      //     $display("ENTER MODE 1");
+      //     for (int i = 0; i < x_len + 1; i++) begin
+      //       mem_expected[dst_addr].push_back(memory.read(src_addr));
+      //     end
+      //   end
+      //   else if (src_burst_addr == 1 && dst_burst_addr == 0) begin
+      //     $display("ENTER MODE 2");
+      //     for (int i = 0; i < x_len + 1; i++) begin
+      //       mem_expected[dst_addr].push_back(memory.read(src_addr + i));
+      //     end
+      //   end
+      //   else if (src_burst_addr == 0 && dst_burst_addr == 1) begin
+      //     $display("ENTER MODE 3");
+      //     for (int i = 0; i < x_len + 1; i++) begin
+      //       mem_expected[dst_addr + i].push_back(memory.read((src_addr + i) % (wd_per_burst_addr + 1)));
+      //     end
+      //   end
+      //   else if (src_burst_addr == 1 && dst_burst_addr == 1) begin
+      //     $display("ENTER MODE 4");
+      //     for (int i = 0; i < x_len + 1; i++) begin
+      //       mem_expected[dst_addr + i].push_back(memory.read(src_addr + i));
+      //     end
+      //   end
+      // end
 
-      else if (count_process == 10) begin
-        $display("ENTER MODE 2D");
-        for (int k = 0; k < total_cyclic; k++) begin
-          for (int i = 0; i < y_len + 1; i++) begin
-            for (int j = 0; j < x_len + 1; j++) begin
-              mem_expected[dst_addr + i * dst_stride + j].push_back(memory.read(src_addr + i * src_stride + j));
-            end
+      // else if (count_process == 10) begin
+      //   $display("ENTER MODE 2D");
+      //   for (int k = 0; k < total_cyclic; k++) begin
+      //     for (int i = 0; i < y_len + 1; i++) begin
+      //       for (int j = 0; j < x_len + 1; j++) begin
+      //         mem_expected[dst_addr + i * dst_stride + j].push_back(memory.read(src_addr + i * src_stride + j));
+      //       end
+      //     end
+      //   end
+      // end
+
+      if (count_process == 20) begin
+        $display ("ENTER MODE 2D - 2 DMA CHANNEL");
+        for (int i = 0; i < y_len_1 + 1; i++) begin
+          for (int j = 0; j < x_len_1 + 1; j++) begin
+            mem_expected_chn_1[dst_addr_1 + i * dst_stride_1 + j].push_back(memory.read(src_addr_1 + i * src_stride_1 + j));
           end
         end
+
+        for (int i = 0; i < y_len_2 + 1; i++) begin
+          for (int j = 0; j < x_len_2 + 1; j++) begin
+            mem_expected_chn_2[dst_addr_2 + i * dst_stride_2 + j].push_back(memory.read(src_addr_2 + i * src_stride_2 + j));
+          end
+        end
+
       end
     end
 
@@ -161,56 +247,115 @@ class base_scoreboard extends uvm_scoreboard;
     `uvm_info(get_type_name(), $sformatf("Captured packet from mon %s", item.sprint()), UVM_LOW)
     if (item.m_awburst_o == 0) begin
       for (int i = 0; i < item.m_awlen_o + 1; i++) begin
-        mem_actual[item.m_awaddr_o].push_back(item.buffer_wdata[0]);
+        mem_actual_chn_1[item.m_awaddr_o].push_back(item.buffer_wdata[0]);
         item.buffer_wdata.pop_front();
       end
     end
     else if (item.m_awburst_o == 1) begin
-      for (int i = 0; i < item.m_awlen_o + 1; i++) begin
-        mem_actual[item.m_awaddr_o + i].push_back(item.buffer_wdata[0]);
-        item.buffer_wdata.pop_front();
+      if (item.m_awid_o == 1) begin // Channel 1
+        for (int i = 0; i < item.m_awlen_o + 1; i++) begin
+          mem_actual_chn_1[item.m_awaddr_o + i].push_back(item.buffer_wdata[0]);
+          item.buffer_wdata.pop_front();
+        end
       end
+      if (item.m_awid_o == 2) begin // Channel 2
+        for (int i = 0; i < item.m_awlen_o + 1; i++) begin
+          mem_actual_chn_2[item.m_awaddr_o + i].push_back(item.buffer_wdata[0]);
+          item.buffer_wdata.pop_front();
+        end
+    end
+
     end
     
   endfunction
 
   virtual function void extract_phase(uvm_phase phase);
-    temp_mem_actual = mem_actual;
-    temp_mem_expected = mem_expected;
+    /* DEBUG */
+
+    $display("src_addr_1: %0d", src_addr_1);
+    $display("dst_addr_1: %0d", dst_addr_1);
+    $display("x_len_1: %0d", x_len_1);
+    $display("y_len_1: %0d", y_len_1);
+    $display("chn_flag_1: %0d", chn_flag_1);
+    $display("src_burst_addr_1: %0d", src_burst_addr_1);
+    $display("dst_burst_addr_1: %0d", dst_burst_addr_1);
+    $display("wd_per_burst_addr_1: %0d", wd_per_burst_addr_1);
+    $display("src_stride_1: %0d", src_stride_1);
+    $display("dst_stride_1: %0d", dst_stride_1);
+
+    $display("src_addr_2: %0d", src_addr_2);
+    $display("dst_addr_2: %0d", dst_addr_2);
+    $display("x_len_2: %0d", x_len_2);
+    $display("y_len_2: %0d", y_len_2);
+    $display("chn_flag_2: %0d", chn_flag_2);
+    $display("src_burst_addr_2: %0d", src_burst_addr_2);
+    $display("dst_burst_addr_2: %0d", dst_burst_addr_2);
+    $display("wd_per_burst_addr_2: %0d", wd_per_burst_addr_2);
+    $display("src_stride_2: %0d", src_stride_2);
+    $display("dst_stride_2: %0d", dst_stride_2);
 
     for (int i = 0; i < TOTAL_PIXEL; i++) begin
-      if (temp_mem_expected[i].size() != 0) begin
-        `uvm_info("MEM EXPECTED EXTRACT_PHASE", $sformatf("mem_expected[%0d]: %p", i, temp_mem_expected[i]), UVM_LOW)
+      if (mem_expected_chn_1[i].size() != 0) begin
+        `uvm_info("MEM EXPECTED CHANNEL 1 EXTRACT_PHASE", $sformatf("mem_expected_chn_1[%0d]: %p", i, mem_expected_chn_1[i]), UVM_LOW)
       end
-      // temp_mem_expected.pop_front();
     end
+
+    for (int i = 0; i < TOTAL_PIXEL; i++) begin
+      if (mem_expected_chn_2[i].size() != 0) begin
+        `uvm_info("MEM EXPECTED CHANNEL 2 EXTRACT_PHASE", $sformatf("mem_expected_chn_2[%0d]: %p", i, mem_expected_chn_2[i]), UVM_LOW)
+      end
+    end
+
+    for (int i = 0; i < TOTAL_PIXEL; i++) begin
+      if (mem_actual_chn_1[i].size() != 0) begin
+        `uvm_info("MEM ACTUAL CHANNEL 1 EXTRACT_PHASE", $sformatf("mem_actual_chn_1[%0d]: %p", i, mem_actual_chn_1[i]), UVM_LOW)
+      end
+    end
+
+    for (int i = 0; i < TOTAL_PIXEL; i++) begin
+      if (mem_actual_chn_2[i].size() != 0) begin
+        `uvm_info("MEM ACTUAL CHANNEL 2 EXTRACT_PHASE", $sformatf("mem_actual_chn_2[%0d]: %p", i, mem_actual_chn_2[i]), UVM_LOW)
+      end
+    end
+    /* DEBUG */
 
 
     for (int i = 0; i < TOTAL_PIXEL; i++) begin
-      if (temp_mem_actual[i].size() != 0) begin
-        `uvm_info("MEM ACTUAL EXTRACT_PHASE", $sformatf("mem_actual[%0d]: %p", i, temp_mem_actual[i]), UVM_LOW)
+      if (mem_expected_chn_1[i].size() != mem_actual_chn_1[i].size()) begin
+        `uvm_error("MEM SIZE ERROR", $sformatf("Error at index i: %0d", i))
       end
-      // temp_mem_actual.pop_front();
-    end
-    // for (int i = 0; i < 1024; i++) begin
+      else begin
+        for (int j = 0; j < mem_expected_chn_1[i].size(); j++) begin
+          if (mem_expected_chn_1[i][0] != mem_actual_chn_1[i][0]) begin
+            `uvm_error("MEM DATA ERROR", $sformatf("Error at index i: %0d, j: %0d", i, j))
+            $display ("Expected: %0d, Actual: %0d", mem_expected_chn_1[i][0], mem_actual_chn_1[i][0]);
+            mem_expected_chn_1[i].pop_front();
+          end
+          else begin
+            $display("PASS");
+          end
+        end
+      end
+    end 
 
-    //   if (mem_expected[i].size() != mem_actual[i].size()) begin
-    //     `uvm_error("MEM SIZE ERROR", $sformatf("Error at index i: %0d", i))
-    //   end
-    //   else begin
-    //     for (int j = 0; j < mem_expected[i].size(); j++) begin
-    //       if (mem_expected[i][0] != mem_actual[i][0]) begin
-    //         `uvm_error("MEM DATA ERROR", $sformatf("Error at index i: %0d, j: %0d", i, j))
-    //         $display ("Expected: %0d, Actual: %0d", mem_expected[i][0], mem_actual[i][0]);
-    //         mem_expected[i].pop_front();
-    //       end
-    //       else begin
-    //         $display("PASS");
-    //       end
-    //     end
-    //   end
+    for (int i = 0; i < TOTAL_PIXEL; i++) begin
+      if (mem_expected_chn_2[i].size() != mem_actual_chn_2[i].size()) begin
+        `uvm_error("MEM SIZE ERROR", $sformatf("Error at index i: %0d", i))
+      end
+      else begin
+        for (int j = 0; j < mem_expected_chn_2[i].size(); j++) begin
+          if (mem_expected_chn_2[i][0] != mem_actual_chn_2[i][0]) begin
+            `uvm_error("MEM DATA ERROR", $sformatf("Error at index i: %0d, j: %0d", i, j))
+            $display ("Expected: %0d, Actual: %0d", mem_expected_chn_2[i][0], mem_actual_chn_2[i][0]);
+            mem_expected_chn_2[i].pop_front();
+          end
+          else begin
+            $display("PASS");
+          end
+        end
+      end
+    end 
 
-    // end 
   endfunction
 
 endclass

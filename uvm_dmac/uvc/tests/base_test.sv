@@ -33,8 +33,8 @@ class base_test extends uvm_test;
     phase.raise_objection(this);
     seq0 = init_read_seq::type_id::create("sequence0");
     seq0.start(bus_env.master.sequencer);
-    // #2000ns; // 26ns
-    dma_done.wait_trigger();
+    #2000ns; // 26ns
+    // dma_done.wait_trigger();
     phase.drop_objection(this);
   endtask
 

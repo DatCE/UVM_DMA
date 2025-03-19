@@ -56,7 +56,7 @@ import base_uvm_pkg::*;
 module top;
 
   parameter DMA_BASE_ADDR = 32'h8000_0000;
-  parameter DMA_CHN_NUM = 1;  // Number of DMA channels
+  parameter DMA_CHN_NUM = 2;  // Number of DMA channels
   parameter DMA_LENGTH_W = 16;  // Maximum size of 1 transfer is (2^16 * 256) 
   parameter DMA_DESC_DEPTH = 4;  // The maximum number of descriptors in each channel
   parameter DMA_CHN_ARB_W = 3;  // Channel arbitration weight's width

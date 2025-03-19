@@ -241,11 +241,7 @@ class base_item extends uvm_sequence_item;
   endfunction
   
   function void post_randomize();
-    $display("Before process address", s_awaddr_i);
-    $display ("chn_id", chn_id * (2**4));
-    $display(s_awaddr_i + chn_id * (2**4));
-    $display(s_araddr_i + chn_id << 4);
+    // Process addr for exact channel
     s_awaddr_i = s_awaddr_i + chn_id * (2**4);
-     $display("After process address", s_awaddr_i);
   endfunction
 endclass : base_item
