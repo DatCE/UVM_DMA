@@ -46,7 +46,7 @@ class base_scoreboard extends uvm_scoreboard;
 
   int chn_id;
 
-  int total_cyclic = 3;
+  int total_cyclic;
   bit  [31:0] mem_expected_chn_1 [TOTAL_PIXEL] [$];
   bit  [31:0] mem_expected_chn_2 [TOTAL_PIXEL] [$];
   bit  [31:0] mem_actual_chn_1   [TOTAL_PIXEL] [$];
@@ -62,6 +62,8 @@ class base_scoreboard extends uvm_scoreboard;
     mon_item_collected_export = new("mon_item_collected_export", this);
     if (!uvm_config_db#(base_mem)::get(this, "", "memory", memory))
       `uvm_fatal("NOMEM", {"memory must be set for: ", get_full_name()})
+    if (!uvm_config_db#(int)::get(this, "", "total_cyclic", total_cyclic))
+      `uvm_fatal("NOTOTALCYCLIC", {"total_cyclic must be set for: ", get_full_name()})
 
     // $display("IN SCOREBOARD");
     // memory.mem_print();
@@ -226,15 +228,18 @@ class base_scoreboard extends uvm_scoreboard;
 
       if (count_process == 20) begin
         $display ("ENTER MODE 2D - 2 DMA CHANNEL");
-        for (int i = 0; i < y_len_1 + 1; i++) begin
-          for (int j = 0; j < x_len_1 + 1; j++) begin
-            mem_expected_chn_1[dst_addr_1 + i * dst_stride_1 + j].push_back(memory.read(src_addr_1 + i * src_stride_1 + j));
+        for (int k = 0; k < total_cyclic; k++) begin
+          for (int i = 0; i < y_len_1 + 1; i++) begin
+            for (int j = 0; j < x_len_1 + 1; j++) begin
+              mem_expected_chn_1[dst_addr_1 + i * dst_stride_1 + j].push_back(memory.read(src_addr_1 + i * src_stride_1 + j));
+            end
           end
         end
-
-        for (int i = 0; i < y_len_2 + 1; i++) begin
-          for (int j = 0; j < x_len_2 + 1; j++) begin
-            mem_expected_chn_2[dst_addr_2 + i * dst_stride_2 + j].push_back(memory.read(src_addr_2 + i * src_stride_2 + j));
+        for (int k = 0; k < total_cyclic; k++) begin
+          for (int i = 0; i < y_len_2 + 1; i++) begin
+            for (int j = 0; j < x_len_2 + 1; j++) begin
+              mem_expected_chn_2[dst_addr_2 + i * dst_stride_2 + j].push_back(memory.read(src_addr_2 + i * src_stride_2 + j));
+            end
           end
         end
 
@@ -294,6 +299,7 @@ class base_scoreboard extends uvm_scoreboard;
     $display("src_stride_2: %0d", src_stride_2);
     $display("dst_stride_2: %0d", dst_stride_2);
 
+
     for (int i = 0; i < TOTAL_PIXEL; i++) begin
       if (mem_expected_chn_1[i].size() != 0) begin
         `uvm_info("MEM EXPECTED CHANNEL 1 EXTRACT_PHASE", $sformatf("mem_expected_chn_1[%0d]: %p", i, mem_expected_chn_1[i]), UVM_LOW)
@@ -319,10 +325,11 @@ class base_scoreboard extends uvm_scoreboard;
     end
     /* DEBUG */
 
-
+    $display("---------------------------------START CHANNEL 1---------------------------------");
     for (int i = 0; i < TOTAL_PIXEL; i++) begin
       if (mem_expected_chn_1[i].size() != mem_actual_chn_1[i].size()) begin
-        `uvm_error("MEM SIZE ERROR", $sformatf("Error at index i: %0d", i))
+        `uvm_error("MEM SIZE ERROR CHANNEL 1", $sformatf("Error at index i: %0d", i))
+        $display ("Expected: %p, Actual: %p", mem_expected_chn_1[i], mem_actual_chn_1[i]);
       end
       else begin
         for (int j = 0; j < mem_expected_chn_1[i].size(); j++) begin
@@ -337,10 +344,11 @@ class base_scoreboard extends uvm_scoreboard;
         end
       end
     end 
-
+    $display("---------------------------------START CHANNEL 2---------------------------------");
     for (int i = 0; i < TOTAL_PIXEL; i++) begin
       if (mem_expected_chn_2[i].size() != mem_actual_chn_2[i].size()) begin
-        `uvm_error("MEM SIZE ERROR", $sformatf("Error at index i: %0d", i))
+        `uvm_error("MEM SIZE ERROR CHANNEL 2", $sformatf("Error at index i: %0d", i))
+        $display ("Expected: %p, Actual: %p", mem_expected_chn_2[i], mem_actual_chn_2[i]);
       end
       else begin
         for (int j = 0; j < mem_expected_chn_2[i].size(); j++) begin

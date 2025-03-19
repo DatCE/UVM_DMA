@@ -70,7 +70,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + CHN_FLAGS_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 1;
+                  s_wdata_i == 3;
 
                 });  
 
@@ -123,7 +123,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + CHN_FLAGS_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 1;
+                  s_wdata_i == 3;
 
                 });  
   
@@ -263,7 +263,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + DST_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 10;
+                  s_wdata_i == 0;
                 });
 
     `uvm_do_with(req,
@@ -275,6 +275,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + TRANSFER_X_LEN_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
+                  // s_wdata_i inside {[0:319]};
                   s_wdata_i == 10;
                 });
 
@@ -287,7 +288,8 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + TRANSFER_Y_LEN_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 1;
+                  // s_wdata_i inside {[0:239]};
+                  s_wdata_i == 5;
                 });
 
     `uvm_do_with(req,
@@ -359,7 +361,8 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + ATX_WD_PER_BURST_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 5;    // SO LUONG DATA TRONG MOI BURST
+                  // s_wdata_i inside {[0:50]};   // SO LUONG DATA TRONG MOI BURST
+                  s_wdata_i == 5;
                 });
 
   //------------------------------ END CONFIG CHANNEL 1 ------------------------------
@@ -397,6 +400,7 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + TRANSFER_X_LEN_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
+                  s_wdata_i inside {[0:319]};
                   s_wdata_i == 10;
                 });
 
@@ -409,7 +413,8 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + TRANSFER_Y_LEN_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 1;
+                  s_wdata_i inside {[0:239]};
+                  s_wdata_i == 2;
                 });
 
     `uvm_do_with(req,
@@ -481,7 +486,8 @@ class init_read_seq extends uvm_sequence #(base_item);
                   s_awaddr_i == BASE_ADDR + ATX_WD_PER_BURST_ADDR;
                   s_awburst_i == 0; // FIXED
                   s_awlen_i == 0; 
-                  s_wdata_i == 5;    // SO LUONG DATA TRONG MOI BURST
+                  s_wdata_i inside {[0:50]};   // SO LUONG DATA TRONG MOI BURST
+                  // s_wdata_i == 5;
                 });
   //------------------------------ END CONFIG CHANNEL 2 ------------------------------
     `uvm_do_with(req,
@@ -703,4 +709,118 @@ class init_read_seq extends uvm_sequence #(base_item);
   // end
 // endtask
 
+endclass
+
+
+
+
+
+
+class stop_cyclic_0 extends uvm_sequence #(base_item);
+  base_item req;
+  `uvm_object_utils_begin(stop_cyclic_0)
+    `uvm_field_object(req, UVM_ALL_ON)
+  `uvm_object_utils_end
+
+  parameter BASE_ADDR = 32'h8000_0000;
+  parameter DMA_CONTROL_ADDR = 'h0000;
+  parameter ATX_ID_ADDR = 'h0005;
+  parameter ATX_SRC_BURST_ADDR = 'h0006; 
+  parameter ATX_DST_BURST_ADDR = 'h0007; 
+  parameter ATX_WD_PER_BURST_ADDR  = 'h0008; 
+  parameter SRC_ADDR = 'h0009;
+  parameter DST_ADDR = 'h000A;
+  parameter TRANSFER_SUBMIT_ADDR = 'h1000;
+  parameter TRANSFER_X_LEN_ADDR = 'h000B;
+  parameter TRANSFER_Y_LEN_ADDR = 'h000C;
+  parameter SRC_STRIDE_ADDR = 'h000D;
+  parameter DST_STRIDE_ADDR = 'h000E;
+  parameter TRANSFER_ID_ADDR = 'h2001;
+  parameter TRANSFER_DONE_ADDR = 'h2002;
+  parameter ACTIVE_TRANSFER_ID_ADDR = 'h2003;
+  parameter ACTIVE_TRANSFER_LEN_ADDR = 'h2004;
+  parameter CHN_CONTROL_ADDR = 'h0001;
+  parameter CHN_FLAGS_ADDR = 'h0002;
+  parameter CHN_IRQ_MASK_ADDR = 'h0003;
+  parameter CHN_IRQ_SOURCE_ADDR = 'h2000;
+  parameter CHN_ARBIT_RATE_ADDR = 'h0004;
+
+  int wait_response = 0;
+  int cnt = 0;
+
+  function new(string name = "stop_cyclic_0");
+    super.new(name);
+  endfunction : new
+
+  virtual task body();
+    
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 0;
+                  s_awid_i == 1;
+                  s_awaddr_i == BASE_ADDR + CHN_FLAGS_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 0;
+
+                });  
+    get_response(rsp);
+  endtask
+endclass
+
+
+class stop_cyclic_1 extends uvm_sequence #(base_item);
+  base_item req;
+  `uvm_object_utils_begin(stop_cyclic_1)
+    `uvm_field_object(req, UVM_ALL_ON)
+  `uvm_object_utils_end
+
+  parameter BASE_ADDR = 32'h8000_0000;
+  parameter DMA_CONTROL_ADDR = 'h0000;
+  parameter ATX_ID_ADDR = 'h0005;
+  parameter ATX_SRC_BURST_ADDR = 'h0006; 
+  parameter ATX_DST_BURST_ADDR = 'h0007; 
+  parameter ATX_WD_PER_BURST_ADDR  = 'h0008; 
+  parameter SRC_ADDR = 'h0009;
+  parameter DST_ADDR = 'h000A;
+  parameter TRANSFER_SUBMIT_ADDR = 'h1000;
+  parameter TRANSFER_X_LEN_ADDR = 'h000B;
+  parameter TRANSFER_Y_LEN_ADDR = 'h000C;
+  parameter SRC_STRIDE_ADDR = 'h000D;
+  parameter DST_STRIDE_ADDR = 'h000E;
+  parameter TRANSFER_ID_ADDR = 'h2001;
+  parameter TRANSFER_DONE_ADDR = 'h2002;
+  parameter ACTIVE_TRANSFER_ID_ADDR = 'h2003;
+  parameter ACTIVE_TRANSFER_LEN_ADDR = 'h2004;
+  parameter CHN_CONTROL_ADDR = 'h0001;
+  parameter CHN_FLAGS_ADDR = 'h0002;
+  parameter CHN_IRQ_MASK_ADDR = 'h0003;
+  parameter CHN_IRQ_SOURCE_ADDR = 'h2000;
+  parameter CHN_ARBIT_RATE_ADDR = 'h0004;
+
+  int wait_response = 0;
+  int cnt = 0;
+
+  function new(string name = "stop_cyclic_1");
+    super.new(name);
+  endfunction : new
+
+  virtual task body();
+    
+    `uvm_do_with(req,
+                {
+                  type_act == WRITE;
+                  type_axi == SLV;
+                  chn_id == 1;
+                  s_awid_i == 2;
+                  s_awaddr_i == BASE_ADDR + CHN_FLAGS_ADDR;
+                  s_awburst_i == 0; // FIXED
+                  s_awlen_i == 0; 
+                  s_wdata_i == 0;
+
+                });  
+    get_response(rsp);  
+  endtask
 endclass

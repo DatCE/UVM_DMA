@@ -140,7 +140,6 @@ class base_item extends uvm_sequence_item;
 
   constraint type_act_cstr { type_act inside {READ, WRITE}; }
   constraint type_axi_cstr { type_axi inside {SLV, MST}; }
-
   `uvm_object_utils_begin(base_item)
 
     `uvm_field_sarray_int(buffer_wdata, UVM_ALL_ON);

@@ -12,17 +12,25 @@ class base_driver extends uvm_driver #(base_item);
   int start_addr;
   int size;
   int length;
-  uvm_event dma_done;
-  int count = 0;
+  uvm_event dma_chn_1_done;
+  uvm_event dma_chn_2_done;
+  int count_1 = 0;
+  int count_2 = 0;
   base_item item_temp;
   base_item item_temp_ar;
   base_item item_temp_aw;
   base_item item_temp_w;
-  int wd_per_burst = -1;
-  int x_len = -1;
-  int y_len;
-  int num_trans_row = 0;
+  int wd_per_burst_1 = -1;
+  int x_len_1 = -1;
+  int y_len_1;
+  int num_trans_row_1 = 0;
   int chn_id;
+
+  int wd_per_burst_2 = -1;
+  int x_len_2 = -1;
+  int y_len_2;
+  int num_trans_row_2 = 0;
+  int total_cyclic;
   
 
   parameter BASE_ADDR = 32'h8000_0000;
@@ -57,13 +65,16 @@ class base_driver extends uvm_driver #(base_item);
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    if (!uvm_config_db#(uvm_event)::get(this, "", "dma_done", dma_done))
-      `uvm_fatal("NODMADONE", {"dma done must be set for: ", get_full_name()})
+    if (!uvm_config_db#(uvm_event)::get(this, "", "dma_chn_1_done", dma_chn_1_done))
+      `uvm_fatal("NODMADONECHN1", {"dma done must be set for: ", get_full_name()})
+    if (!uvm_config_db#(uvm_event)::get(this, "", "dma_chn_2_done", dma_chn_2_done))
+      `uvm_fatal("NODMADONECHN2", {"dma done must be set for: ", get_full_name()})
     if (!uvm_config_db#(virtual dut_if)::get(this, "", "vif", vif))
       `uvm_fatal("NOVIF", {"virtual interface must be set for: ", get_full_name()})
     if (!uvm_config_db#(base_mem)::get(this, "", "memory", memory))
       `uvm_fatal("NOMEM", {"memory must be set for: ", get_full_name()})
-    
+    if (!uvm_config_db#(int)::get(this, "", "total_cyclic", total_cyclic))
+      `uvm_fatal("NOTOTALCYCLIC1", {"total_cyclic must be set for: ", get_full_name()})
   endfunction
 
   task run_phase(uvm_phase phase);
@@ -99,9 +110,19 @@ class base_driver extends uvm_driver #(base_item);
           item_collected_port.write(rsp);
         end
         if (b_item.s_awaddr_i == TRANSFER_X_LEN_ADDR + chn_id * (2**4)) begin
-          x_len = b_item.s_wdata_i;
-          if (wd_per_burst != -1)  begin
-            num_trans_row = $ceil(1.0 * (x_len + 1) / (wd_per_burst + 1));
+          if (chn_id == 0) begin
+            x_len_1 = b_item.s_wdata_i;
+            if (wd_per_burst_1 != -1)  begin
+              num_trans_row_1 += $ceil(1.0 * (x_len_1 + 1) / (wd_per_burst_1 + 1));
+              $display("num_trans_row_1: %0d", num_trans_row_1);
+            end
+          end
+          else if (chn_id == 1) begin
+            x_len_2 = b_item.s_wdata_i;
+            if (wd_per_burst_2 != -1)  begin
+              num_trans_row_2 += $ceil(1.0 * (x_len_1 + 1) / (wd_per_burst_1 + 1));
+              $display("num_trans_row_2: %0d", num_trans_row_2);
+            end
           end
           item_collected_port.write(rsp);
         end
@@ -115,14 +136,31 @@ class base_driver extends uvm_driver #(base_item);
           item_collected_port.write(rsp);
         end
         if (b_item.s_awaddr_i == ATX_WD_PER_BURST_ADDR + chn_id * (2**4)) begin
-          wd_per_burst = b_item.s_wdata_i;
-          if (x_len != -1)  begin
-            num_trans_row = $ceil(1.0 * (x_len + 1) / (wd_per_burst + 1));
+          if (chn_id == 0) begin
+            wd_per_burst_1 = b_item.s_wdata_i;
+            if (x_len_1 != -1)  begin
+              num_trans_row_1 += $ceil(1.0 * (x_len_1 + 1) / (wd_per_burst_1 + 1));
+              $display("num_trans_row_1: %0d", num_trans_row_1);
+            end
+          end
+          else if (chn_id == 1) begin
+            wd_per_burst_2 = b_item.s_wdata_i;
+            if (x_len_2 != -1)  begin
+              num_trans_row_2 += $ceil(1.0 * (x_len_2 + 1) / (wd_per_burst_2 + 1));
+              $display("num_trans_row_2: %0d", num_trans_row_2);
+            end
           end
           item_collected_port.write(rsp);
         end
         if (b_item.s_awaddr_i == TRANSFER_Y_LEN_ADDR + chn_id * (2**4)) begin
-          y_len = b_item.s_wdata_i;
+          if (chn_id == 0) begin
+            y_len_1 = b_item.s_wdata_i;
+            $display("Y_LEN_1", y_len_1);
+          end
+          else if (chn_id == 1) begin
+            y_len_2 = b_item.s_wdata_i;
+            $display("Y_LEN_2", y_len_2);
+          end
           item_collected_port.write(rsp);
         end
         if (b_item.s_awaddr_i == SRC_STRIDE_ADDR + chn_id * (2**4)) begin
@@ -236,7 +274,12 @@ class base_driver extends uvm_driver #(base_item);
     base_item item = null;
     forever begin
       mst_b_mbx.get(item);
-      count ++;
+      if (item.m_awid_o == 1) count_1 ++;
+      else count_2 ++;
+      $display ("TOTAL WAIT 1: %0d", num_trans_row_1 * (y_len_1 + 1) * 2);
+      $display ("TOTAL WAIT 2: %0d", num_trans_row_2 * (y_len_2 + 1) * 2);
+      $display ("count_1: %0d", count_1); 
+      $display ("count_2: %0d", count_2);
       $display("ENTER MASTER RESP");
       wait(vif.m_bready_o);
       @(posedge vif.clk)
@@ -245,7 +288,14 @@ class base_driver extends uvm_driver #(base_item);
       vif.m_bvalid_i <= 1;
       @(posedge vif.clk)
       vif.m_bvalid_i <= 0;
-      if (count == num_trans_row * (y_len + 1) * 3) dma_done.trigger();
+      if (count_1 == num_trans_row_1 * (y_len_1 + 1) * (total_cyclic - 1)) begin
+        $display("DONE DMA 1 TRIGGER");
+        dma_chn_1_done.trigger();
+      end
+      if (count_2 == num_trans_row_2 * (y_len_2 + 1) * (total_cyclic - 1)) begin
+        $display("DONE DMA 2 TRIGGER");
+        dma_chn_2_done.trigger();
+      end
     end
   endtask
 
@@ -262,8 +312,8 @@ class base_driver extends uvm_driver #(base_item);
       @(posedge vif.clk);  
       wait(vif.s_awready_o);
       // #1;
-      // @(posedge vif.clk);
-      // vif.s_awvalid_i <= 0;
+      @(posedge vif.clk);
+      vif.s_awvalid_i <= 0;
       slv_w_mbx.put(item);
       `uvm_info("Handshake successfully slave", $sformatf("time: %0t", $realtime), UVM_LOW)
     end
@@ -298,9 +348,9 @@ class base_driver extends uvm_driver #(base_item);
       vif.s_arvalid_i <= 1;
       @(posedge vif.clk);
       wait(vif.s_arready_o);
+      @(posedge vif.clk);
+      vif.s_arvalid_i <= 0;
       slv_r_mbx.put(item);
-      // @(posedge vif.clk);
-      // vif.s_arvalid_i <= 0;
     end
   endtask
 
